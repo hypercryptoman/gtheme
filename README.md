@@ -1,6 +1,6 @@
 # gtheme
 
-gtheme is a keyboard-driven theme picker for Ghostty on macOS. It previews colors in the current terminal using a sample prompt, diff, code, and ANSI palette. Browse a curated selection of themes bundled with Ghostty, filter by name, and save the one you want.
+gtheme is a keyboard-driven theme picker for Ghostty on macOS. It previews colors in the current terminal using a sample prompt, diff, code, and ANSI palette. Browse bundled and custom themes, filter by name, and save the one you want.
 
 [Project site](https://hypercryptoman.github.io/gtheme/)
 
@@ -35,15 +35,16 @@ gtheme
 | `q` or Esc while browsing | Cancel and restore the previous colors |
 | Ctrl+C | Cancel from either mode |
 
-Saving updates the `theme` setting in `~/.config/ghostty/config` by default and asks the running Ghostty process to reload. If the palette doesn’t update after saving, use Ghostty’s Reload Configuration menu item. The picker writes a single theme value. If you use an automatic light/dark pair, saving replaces the pair in the selected config.
+Saving writes one `theme` value to your Ghostty config and prints the file it updated. If you use an automatic light/dark pair, saving replaces the pair in that file. The picker checks both the macOS Application Support and XDG config directories, including legacy files named `config`. With no existing config, it uses the macOS Application Support directory. It requests a reload from the Ghostty instance running the terminal when it can verify support for the reload signal.
 
 ### Command-line options
 
 | Option | Purpose |
 | --- | --- |
 | `-h`, `--help` | Show usage and exit |
-| `--config PATH` | Edit a different Ghostty config file. Choose a file Ghostty actually loads for the reload to apply. |
-| `--themes-dir PATH` | Read themes from a different directory. By default the picker uses `/Applications/Ghostty.app/Contents/Resources/ghostty/themes`. |
+| `--config PATH` | Edit a specific config file, such as a file loaded through a `config-file` directive. |
+| `--themes-dir PATH` | Browse only this directory. The picker saves the selected theme as an absolute path so Ghostty can find it. |
+| `--no-reload` | Write the config and leave reloading to you. |
 
 ### Examples
 
@@ -52,9 +53,16 @@ Saving updates the `theme` setting in `~/.config/ghostty/config` by default and 
 - **Use a Ghostty installation in your home folder.** Run `gtheme --themes-dir "$HOME/Applications/Ghostty.app/Contents/Resources/ghostty/themes"`.
 - **Use an alternate Ghostty config.** Run `gtheme --config "$HOME/Library/Application Support/com.mitchellh.ghostty/config"` if that’s the file Ghostty reads.
 
-Theme availability depends on the files in your installed Ghostty bundle.
+## Troubleshooting
+
+- **`gtheme: command not found`.** Run `~/.local/bin/gtheme` or add `~/.local/bin` to your `PATH` as shown above. If the error names `python3`, install Python 3.8 or later and confirm that `python3 --version` works in the same Ghostty window.
+- **No themes found or colors don’t preview.** Run the picker directly in Ghostty on your Mac. A remote shell or terminal multiplexer can block the escape sequences used for previews. The picker looks in the app bundle and in `$XDG_CONFIG_HOME/ghostty/themes` (or `~/.config/ghostty/themes`). If Ghostty is installed elsewhere, pass its theme directory with `--themes-dir`.
+- **The saved theme doesn’t take effect.** Press Cmd+Shift+, or use Ghostty’s Reload Configuration command. Check the config path printed by `gtheme`. An included config file, a launch argument, or explicit color settings can override the chosen theme. Use `--config` to target the file that sets the effective theme. Use `--no-reload` when testing or editing a separate config. [Ghostty configuration guide](https://ghostty.org/docs/config)
+- **A custom theme can’t be selected.** Use a readable Ghostty theme file with color settings such as `background = #1e1e2e`. If the picker reports a filename problem, remove commas, colons, equal signs, and double quotes from its filename or the absolute path used with `--themes-dir`.
 
 ## Screenshots
+
+The picker displays sample terminal output to show how each theme colors text.
 
 **Browsing themes with Catppuccin Mocha highlighted**
 
@@ -62,4 +70,4 @@ Theme availability depends on the files in your installed Ghostty bundle.
 
 **Filtering by `nord` with Nord highlighted**
 
-![gtheme previewing Nord with the theme list narrowed to six matches for nord](assets/gtheme-filtering.png)
+![gtheme previewing Nord with the theme list narrowed to names that match nord](assets/gtheme-filtering.png)

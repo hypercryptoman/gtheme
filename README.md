@@ -2,7 +2,7 @@
 
 gtheme lets you preview and change Ghostty themes on macOS with your keyboard. Filter bundled or custom themes by name and see how they color a sample prompt, diff, code, and ANSI palette before you save.
 
-[Project site](https://hypercryptoman.github.io/gtheme/) · [Ghostty themes to try](https://hypercryptoman.github.io/gtheme/#ghostty-themes)
+[Project site](https://hypercryptoman.github.io/gtheme/) · [Top 50 Ghostty themes](https://hypercryptoman.github.io/gtheme/ghostty-themes/)
 
 ## Install
 

@@ -1,0 +1,195 @@
+#!/usr/bin/env python3
+"""gtheme - live Ghostty theme picker. Up/Down (or j/k) preview, PgUp/PgDn jump, / filter,
+Enter = save to config, q/Esc = cancel and restore."""
+import argparse
+import os
+import re
+import select
+import stat
+import subprocess
+import sys
+import tempfile
+import termios
+import tty
+from pathlib import Path
+
+DEFAULT_THEMES = Path("/Applications/Ghostty.app/Contents/Resources/ghostty/themes")
+DEFAULT_CONFIG = Path("~/.config/ghostty/config")
+THEME_SETTING = re.compile(r"^[ \t]*theme[ \t]*=[ \t]*(.*)$", re.MULTILINE)
+
+parser = argparse.ArgumentParser(description="Preview and save bundled Ghostty themes on macOS.")
+parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG,
+                    help="Ghostty config to edit (default: ~/.config/ghostty/config)")
+parser.add_argument("--themes-dir", type=Path, default=DEFAULT_THEMES,
+                    help="Ghostty theme directory (defaults to /Applications/Ghostty.app)")
+args = parser.parse_args()
+D = args.themes_dir.expanduser()
+CFG = args.config.expanduser()
+if not (sys.stdin.isatty() and sys.stdout.isatty()):
+    parser.error("open gtheme in an interactive Ghostty terminal")
+NAMES=["Catppuccin Mocha", "Catppuccin Macchiato", "Catppuccin Frappe", "Catppuccin Latte", "TokyoNight", "TokyoNight Storm", "TokyoNight Night", "Dracula", "Gruvbox Dark", "Gruvbox Dark Hard", "Nord", "Rose Pine", "Rose Pine Moon", "Rose Pine Dawn", "Kanagawa Wave", "Kanagawa Dragon", "Everforest Dark Hard", "Everforest Light Med", "Solarized Dark Higher Contrast", "One Half Dark", "Atom One Dark", "Nightfox", "Carbonfox", "Github Dark", "Monokai Pro", "Ayu Mirage", "Zenburn", "Synthwave", "Poimandres", "Melange Dark", "Github Light Default", "Github Dark Default", "GitHub Dark Dimmed", "Ayu Light", "Material Darker", "Material Ocean", "Dawnfox", "Dayfox", "Duskfox", "Nordfox", "Terafox", "Night Owl", "Light Owl", "Cobalt2", "Horizon", "Sonokai", "Moonfly", "Iceberg Dark", "Iceberg Light", "Tomorrow Night", "Tomorrow Night Bright", "Tomorrow Night Burns", "Tomorrow Night Eighties", "Tomorrow", "Snazzy", "Monokai Remastered", "Monokai Soda", "Monokai Vivid", "Selenized Dark", "Selenized Light", "Selenized Black", "Gruvbox Light", "Gruvbox Light Hard", "Gruvbox Material", "Gruvbox Material Dark", "Gruvbox Material Light", "Kanagawa Lotus", "TokyoNight Day", "Nord Light", "Nord Wave", "Challenger Deep", "Cyberpunk", "Dark Pastel", "Darkside", "Doom One", "Doom Peacock", "Espresso", "Fahrenheit", "Flat", "Flatland", "Framer", "Fish Tank", "Galaxy", "Hardcore", "Harper", "Hax0r Blue", "Hurtado", "Hybrid", "Jackie Brown", "Kibble", "Laser", "Liquid Carbon", "Lovelace", "Man Page", "Mariana", "Mathias", "Medallion", "Mirage", "Molokai", "Monokai Pro Machine", "Monokai Pro Octagon", "Monokai Pro Ristretto", "Monokai Pro Spectrum", "Neon", "Neopolitan", "Nvim Dark", "Nvim Light", "Obsidian", "Ocean", "Oceanic Next", "One Half Light", "Atom One Light", "Onenord", "Paraiso Dark", "Pencil Dark", "Pencil Light", "Pro", "Red Alert", "Red Planet", "Rouge 2", "Royal", "Seafoam Pastel", "Seoulbones Dark", "Shades Of Purple", "Slate", "Smyck", "Spacedust", "Spiderman", "Square", "Sundried", "0x96f", "Abernathy", "Agave Dusk", "Apple System Colors", "Aubade", "base16-icy", "Black Metal (Burzum)", "Blood Moon", "branch", "Builtin Tango Light", "Canyon Walnut", "Cholla", "CLRS", "Copper Canyon", "Cutie Pro", "datum (dark)", "Desert Morning", "Django Smooth", "Earthsong", "Embark", "Everforest Dark Med", "Farmhouse Light", "Forged in Steel", "GitHub Dark", "Glacier", "Graveyard Shift", "Harvest Moon", "High Desert Snow", "Hopscotch.256", "IC Orange PPL", "Isocon Light", "iTerm2 Tango Light", "Kanagawabones", "Karma Light", "Konsolas", "Liquid Carbon Transparent", "Matcha Zen", "Mesa Twilight", "Modus Operandi Deuteranopia", "Monokai Pro Light", "N0Tch2K", "Night Lion V2", "Noctis Hibernus", "Novel", "Onenord Light", "Painted Desert", "Patina Light", "Pierre Light", "Possessed Toaster", "Pumpkin Patch", "Raycast Dark", "Rhoads Concord", "Safety Glass", "Sea Shells", "SeedFlip Inkwell", "Sequoia Monochrome Light", "Shokunin", "SLOMP", "Spacegray Bright", "Stardust Voltage", "Sunset Drive", "Tango Adapted", "Thermal Receipt", "Trapped in Amber", "Undead", "Vercel", "Warm Neon", "Wryan", "X Paris", "Zacess Cream"]
+names = [n for n in NAMES if (D / n).is_file()]
+if not names:
+    parser.error(f"no picker themes found in {D}; check Ghostty or pass --themes-dir")
+def load(n):
+    t={"p":{}}
+    with (D / n).open(encoding="utf-8") as theme:
+        for line in theme:
+            if line.lstrip().startswith("#") or "=" not in line:
+                continue
+            k, v = [part.strip() for part in line.split("=", 1)]
+            if k == "palette":
+                i, color = v.split("=", 1)
+                t["p"][int(i)] = color
+            else:
+                t[k] = v
+    return t
+def apply(t):
+    o=""
+    for i,c in t["p"].items(): o+="\033]4;%d;%s\033\\"%(i,c)
+    for code,key in((10,"foreground"),(11,"background"),(12,"cursor-color"),(17,"selection-background"),(19,"selection-foreground")):
+        if key in t: o+="\033]%d;%s\033\\"%(code,t[key])
+    sys.stdout.write(o)
+def reset(): sys.stdout.write("\033]104\033\\\033]110\033\\\033]111\033\\\033]112\033\\\033]117\033\\\033]119\033\\")
+def read_config(path):
+    try:
+        return path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return ""
+
+try:
+    configured_themes = THEME_SETTING.findall(read_config(CFG))
+except (OSError, UnicodeError) as error:
+    parser.error(str(error))
+orig = configured_themes[-1].strip() if configured_themes else None
+flt=""; view=names[:]
+def draw(sel):
+    rows,cols=os.get_terminal_size().lines,os.get_terminal_size().columns
+    E="\033["
+    c=lambda n,t:"%s%dm%s%s0m"%(E,n,t,E)
+    R,G,Y,B,M,C=31,32,33,34,35,36; DIM=90
+    def nm(i): return view[i%len(view)] if view else "-"
+    cur=nm(sel)
+    L=[]
+    L.append(E+"1m gtheme"+E+"0m  %d/%d  %s  "%(sel+1,len(view),("filter: "+flt+("_" if typing else "")) if (flt or typing) else "") + c(DIM,"↑↓ preview  PgUp/PgDn jump  / filter  Enter save  q cancel"))
+    L.append(" "+c(DIM,"‹ "+nm(sel-2)+"  ‹ "+nm(sel-1))+"   "+E+"7m "+cur+" "+E+"27m   "+c(DIM,nm(sel+1)+" ›  "+nm(sel+2)+" ›"))
+    L.append("")
+    L+=[
+     c(G,"➜")+" "+c(C,"~/demo")+" "+c(M,"git:(")+c(R,"demo")+c(M,")")+" "+c(Y,"✗")+" git status -sb",
+     "## demo...origin/demo [ahead 2]",
+     c(G," M")+" src/auth/session.ts    "+c(G," M")+" src/routes/login.ts",
+     c(R,"??")+" tests/config.spec.ts    "+c(R,"??")+" notes.txt",
+     "",
+     c(G,"➜")+" "+c(C,"~/demo")+" git diff src/auth/session.ts",
+     c(B,"@@ -12,7 +12,9 @@")+" export async function verify(token: string) {",
+     c(R,"-  const user = jwt.decode(token)"),
+     c(G,"+  const user = await jwt.verify(token, demoKey, { algorithms: ['HS256'] })"),
+     c(G,"+  if (!user) throw new AuthError('invalid token')"),
+     "   return db.users.find({ id: user.sub })",
+     "",
+     c(M,"import")+" "+c(Y,"os")+", "+c(Y,"json")+"  "+c(DIM,"# python"),
+     c(M,"def")+" "+c(B,"load_config")+"("+c(Y,"path")+": "+c(C,"str")+") -> "+c(C,"dict")+":",
+     "    "+c(M,"with")+" "+c(B,"open")+"(path) "+c(M,"as")+" f:  "+c(M,"return")+" json."+c(B,"load")+"(f)  "+c(DIM,"# 42, True, None"),
+     "    "+c(M,"print")+"("+c(G,"f\"loaded {len(cfg)} keys\"")+", "+c(Y,"3.14")+", "+c(Y,"True")+")",
+     "",
+     c(G,"➜")+" "+c(C,"~/demo")+" npm test",
+     c(G," ✓")+" login returns 200 for valid creds "+c(DIM,"(12ms)"),
+     c(G," ✓")+" session expires after 30m "+c(DIM,"(4ms)"),
+     c(R," ✗")+" rejects forged token  "+c(R,"AssertionError: expected 401, got 200"),
+     c(Y," ⚠")+" "+c(Y,"warn")+" deprecated: Buffer() is unsafe, use Buffer.from()",
+     c(R,"Tests:")+" "+c(R,"1 failed")+", "+c(G,"2 passed")+", 3 total",
+     "",
+     c(B,"drwxr-xr-x")+"  "+c(B,"src/")+"  "+c(B,"tests/")+"  "+c(G,"deploy.sh")+"  "+c(Y,"README.md")+"  "+c(C,"link → src/")+"  "+c(R,"backup.tar.gz"),
+     "CPU "+c(G,"██████")+c(Y,"███")+c(R,"█")+c(DIM,"░░░░░")+" 54%   MEM "+c(B,"███████")+c(DIM,"░░░░░░░")+" 3.1G",
+     "",
+    ]
+    pal=""
+    for i in range(8): pal+="%s3%dm██%s9%dm██%s0m "%(E,i,E,i,E)
+    body=L[3:]+[pal,c(G,"➜")+" "+c(C,"~")+" █"]
+    head=L[:2]+[pal]
+    LISTMIN=10
+    room=max(0,rows-len(head)-LISTMIN-2)
+    body=body[:room]
+    h=max(3,rows-len(head)-len(body)-2)
+    top=max(0,min(sel-h//2,len(view)-h)) if len(view)>h else 0
+    lst=[c(DIM,"─"*min(cols-1,60)+" themes ("+str(len(view))+") "+"─"*4)]
+    for i in range(top,min(len(view),top+h)):
+        lst.append((E+"7m > "+view[i]+" "+E+"27m") if i==sel else "   "+view[i])
+    out=E+"H"+E+"2J"
+    for ln in head+[""]+body+lst: out+=ln+E+"K\r\n"
+    sys.stdout.write(out.rstrip("\r\n")); sys.stdout.flush()
+def save(n):
+    path = CFG.resolve()
+    config = read_config(path)
+    setting = "theme = " + n
+    if THEME_SETTING.search(config):
+        config = THEME_SETTING.sub(lambda _: setting, config)
+    else:
+        config = setting + "\n" + config
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=path.parent, delete=False
+        ) as output:
+            temporary = Path(output.name)
+            output.write(config)
+        if path.exists():
+            temporary.chmod(stat.S_IMODE(path.stat().st_mode))
+        temporary.replace(path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+def read_key(fd):
+    key = os.read(fd, 1)
+    if key == b"\x1b" and select.select([fd], [], [], 0.05)[0]:
+        key += os.read(fd, 1)
+        if key == b"\x1b[":
+            while len(key) < 8 and select.select([fd], [], [], 0.05)[0]:
+                key += os.read(fd, 1)
+                if 0x40 <= key[-1] <= 0x7e:
+                    break
+    return key.decode(errors="replace")
+
+
+fd=sys.stdin.fileno(); old=termios.tcgetattr(fd)
+typing=False; sel=view.index(orig) if orig in view else 0
+try:
+    tty.setraw(fd); sys.stdout.write("\033[?1049h\033[?25l")
+    while True:
+        reset()
+        if view: apply(load(view[sel]))
+        draw(sel)
+        ch = read_key(fd)
+        if not ch or ch == "\x03":
+            chosen = None
+            break
+        if typing:
+            if ch in("\r","\n"): typing=False
+            elif ch=="\x1b": typing=False; flt=""; view=names[:]
+            elif ch in("\x7f","\b"): flt=flt[:-1]
+            elif ch.isprintable(): flt+=ch
+            view=[n for n in names if flt.lower() in n.lower()]
+            sel=0; continue
+        if ch in("\x1b[A","k"): sel=(sel-1)%max(1,len(view))
+        elif ch in("\x1b[B","j"): sel=(sel+1)%max(1,len(view))
+        elif ch=="\x1b[5~": sel=max(0,sel-10)
+        elif ch=="\x1b[6~": sel=min(max(0,len(view)-1),sel+10)
+        elif ch=="/": typing=True; flt=""; view=names[:]; sel=0
+        elif ch in("\r","\n") and view: chosen=view[sel]; break
+        elif ch in("q","\x1b"): chosen=None; break
+finally:
+    termios.tcsetattr(fd,termios.TCSADRAIN,old)
+    sys.stdout.write("\033[?25h\033[?1049l"); reset(); sys.stdout.flush()
+if chosen:
+    try:
+        save(chosen)
+    except (OSError, UnicodeError) as error:
+        sys.exit(f"gtheme: could not save {CFG}: {error}")
+    print("Theme set to: " + chosen)
+    if subprocess.run(["pkill", "-USR2", "-x", "ghostty"]).returncode:
+        print("Reload Ghostty’s configuration to apply the theme.", file=sys.stderr)
+else: print("Cancelled, still: "+str(orig))

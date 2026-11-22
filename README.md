@@ -53,3 +53,13 @@ Saving updates the `theme` setting in `~/.config/ghostty/config` by default and 
 - **Use an alternate Ghostty config.** Run `gtheme --config "$HOME/Library/Application Support/com.mitchellh.ghostty/config"` if that’s the file Ghostty reads.
 
 Theme availability depends on the files in your installed Ghostty bundle.
+
+## Screenshots
+
+**Browsing themes with Catppuccin Mocha highlighted**
+
+![gtheme previewing Catppuccin Mocha with a sample diff, ANSI color swatches, and the theme list](assets/gtheme-browsing.png)
+
+**Filtering by `nord` with Nord highlighted**
+
+![gtheme previewing Nord with the theme list narrowed to six matches for nord](assets/gtheme-filtering.png)

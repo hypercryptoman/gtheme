@@ -1,8 +1,8 @@
-# gtheme
+# gtheme | Live Ghostty theme picker for macOS
 
-gtheme is a keyboard-driven theme picker for Ghostty on macOS. It previews colors in the current terminal using a sample prompt, diff, code, and ANSI palette. Browse bundled and custom themes, filter by name, and save the one you want.
+gtheme lets you preview and change Ghostty themes on macOS with your keyboard. Filter bundled or custom themes by name and see how they color a sample prompt, diff, code, and ANSI palette before you save.
 
-[Project site](https://hypercryptoman.github.io/gtheme/)
+[Project site](https://hypercryptoman.github.io/gtheme/) · [Ghostty themes to try](https://hypercryptoman.github.io/gtheme/#ghostty-themes)
 
 ## Install
 

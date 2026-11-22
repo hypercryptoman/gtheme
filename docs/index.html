@@ -3,9 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Preview, filter, and save Ghostty terminal themes from your keyboard with gtheme.">
+  <meta name="description" content="Find and change Ghostty themes on macOS. Preview Catppuccin, Nord, Dracula, and your custom themes live in the terminal with gtheme.">
   <meta name="theme-color" content="#121315">
-  <title>gtheme · Live theme picker for Ghostty</title>
+  <title>gtheme | Live Ghostty Theme Picker for macOS</title>
+  <link rel="canonical" href="https://hypercryptoman.github.io/gtheme/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hypercryptoman.github.io/gtheme/">
+  <meta property="og:title" content="gtheme | Live Ghostty Theme Picker for macOS">
+  <meta property="og:description" content="Browse, preview, and save Ghostty themes from your keyboard.">
+  <meta property="og:image" content="https://raw.githubusercontent.com/hypercryptoman/gtheme/main/assets/gtheme-browsing.png">
+  <meta property="og:image:alt" content="gtheme previewing Catppuccin Mocha with terminal colors and a theme list">
+  <meta name="twitter:card" content="summary_large_image">
   <style>
     :root {
       color-scheme: dark;
@@ -51,7 +59,12 @@
     figcaption { color: var(--muted); margin-top: .65rem; font-size: .875rem; }
     .details { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 5rem); padding-block: 2.5rem 4.5rem; border-top: 1px solid var(--line); }
     h2 { font-size: 1.65rem; line-height: 1.2; margin: 0 0 1rem; letter-spacing: -.035em; }
-    .details p { color: var(--muted); margin: .75rem 0; }
+    .details p, .theme-guide p { color: var(--muted); margin: .75rem 0; }
+    .theme-guide { border-top: 1px solid var(--line); padding-block: 2.5rem 4.5rem; }
+    .theme-guide ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: 1rem; list-style: none; padding: 0; margin: 1.25rem 0; }
+    .theme-guide li { padding: 1rem; background: var(--panel); border: 1px solid var(--line); border-radius: .45rem; }
+    .theme-guide li strong { display: block; }
+    .theme-guide li span { color: var(--muted); }
     pre { margin: 1rem 0; padding: 1rem; overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: .45rem; font: .875rem/1.75 var(--mono); }
     code, kbd { font-family: var(--mono); }
     kbd { border: 1px solid var(--line); border-radius: .25rem; padding: .14em .4em; font-size: .875rem; white-space: nowrap; }
@@ -77,6 +90,7 @@
       <span class="brand">gtheme</span>
       <div class="links">
         <a href="#install">Install</a>
+        <a href="#ghostty-themes">Themes</a>
         <a href="https://github.com/hypercryptoman/gtheme">GitHub</a>
       </div>
     </nav>
@@ -85,7 +99,7 @@
     <section class="hero" aria-labelledby="title">
       <div>
         <p class="platform">Ghostty for macOS</p>
-        <h1 id="title">Find your terminal theme.</h1>
+        <h1 id="title">Preview Ghostty themes live.</h1>
         <p class="intro">Browse Ghostty’s bundled and custom themes, preview colors in your terminal, and save your pick with Enter.</p>
         <a class="button" href="https://github.com/hypercryptoman/gtheme/blob/main/README.md">Read the documentation</a>
       </div>
@@ -137,6 +151,17 @@ install -m 755 gtheme ~/.local/bin/gtheme
         </dl>
       </section>
     </div>
+    <section class="theme-guide" id="ghostty-themes" aria-labelledby="themes-title">
+      <h2 id="themes-title">Ghostty themes to try</h2>
+      <p>Open <code>gtheme</code>, press <kbd>/</kbd>, and type a theme name. Press <kbd>Enter</kbd> to finish filtering, then use the arrow keys to compare matches. Press <kbd>Enter</kbd> again to save.</p>
+      <ul>
+        <li><strong>Catppuccin Mocha</strong><span>Dark background with pastel accents. Try Catppuccin Latte for a light variant.</span></li>
+        <li><strong>Nord</strong><span>Muted blues and cool gray backgrounds.</span></li>
+        <li><strong>Dracula</strong><span>Dark background with bright purple, pink, and green accents.</span></li>
+        <li><strong>Gruvbox Dark</strong><span>Warm yellows, oranges, and greens on a dark background.</span></li>
+      </ul>
+      <p>To set a theme directly in Ghostty, open its configuration with <kbd>Cmd</kbd>+<kbd>,</kbd>, add <code>theme = Nord</code>, and reload the configuration. <a href="https://ghostty.org/docs/features/theme">Ghostty’s guide to color themes</a></p>
+    </section>
   </main>
   <footer>
     <div class="wrap links"><a href="https://github.com/hypercryptoman/gtheme">Source repository</a><a href="https://github.com/hypercryptoman/gtheme#command-line-options">Command-line options</a><a href="https://github.com/hypercryptoman/gtheme#troubleshooting">Troubleshooting</a></div>

@@ -38,14 +38,25 @@ Run `~/.local/bin/gtheme`, or run `gtheme` if `~/.local/bin` is already on your 
 gtheme
 ```
 
+Press Tab to cycle through All, Top 50, Dark, and Light. Search with `/` inside any list. You can also open a list directly.
+
+```sh
+gtheme --top
+gtheme --dark
+gtheme --light
+```
+
+Top 50 follows the gallery’s curated order and shows themes available in your installation. Dark and Light classify installed themes by their background color, including custom themes with a defined background.
+
 | Key | Action |
 | --- | --- |
 | ↑ / ↓ or `k` / `j` | Move one theme and preview it |
+| Tab / Shift+Tab | Switch to the next or previous list |
 | Page Up / Page Down | Jump up or down by ten themes |
 | `/` | Start a case-insensitive name filter |
 | Backspace | Remove a character while editing the filter |
 | Enter while filtering | Finish typing and keep the filtered results |
-| Esc while filtering | Clear the filter and return to all themes |
+| Esc while filtering | Clear the filter and stay in the current list |
 | Enter while browsing | Save the highlighted theme |
 | `q` or Esc while browsing | Cancel and restore the previous colors |
 | Ctrl+C | Cancel from either mode |
@@ -59,6 +70,7 @@ Saving writes one `theme` value to your Ghostty config and prints the file it up
 | `-h`, `--help` | Show usage and exit |
 | `--config PATH` | Edit a specific config file, such as a file loaded through a `config-file` directive. |
 | `--themes-dir PATH` | Browse only this directory. The picker saves the selected theme as an absolute path so Ghostty can find it. |
+| `--top`, `--dark`, `--light` | Open the picker in the chosen list |
 | `--no-reload` | Write the config and leave reloading to you. |
 
 ### Examples

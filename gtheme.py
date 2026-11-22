@@ -25,6 +25,20 @@ COLORS = {"foreground": 10, "background": 11, "cursor-color": 12,
 ANSI = re.compile(r"\033\[[0-9;]*m|.", re.DOTALL)
 CSI = "\033["
 OSC_END = "\033\\"
+COLLECTIONS = {"all": "All", "top": "Top 50", "dark": "Dark", "light": "Light"}
+# Match the published gallery order. Each name is a Ghostty theme filename.
+TOP_THEMES = (
+    'Catppuccin Mocha', 'TokyoNight Storm', 'Dracula', 'Nord', 'Gruvbox Dark', 'Rose Pine',
+    'Kanagawa Wave', 'Everforest Dark Hard', 'Nightfox', 'GitHub Dark Default', 'Ayu Mirage',
+    'One Half Dark', 'Catppuccin Macchiato', 'TokyoNight Night', 'Poimandres',
+    'Solarized Dark Higher Contrast', 'Carbonfox', 'Material Ocean', 'Night Owl',
+    'Flexoki Dark', 'Melange Dark', 'Monokai Pro', 'Selenized Dark', 'Cyberpunk', 'Horizon',
+    'Rose Pine Moon', 'Iceberg Dark', 'Moonfly', 'Zenburn', 'Vercel', 'Catppuccin Latte',
+    'Rose Pine Dawn', 'Gruvbox Light', 'GitHub Light Default', 'TokyoNight Day',
+    'Kanagawa Lotus', 'Ayu Light', 'Nord Light', 'Dayfox', 'Everforest Light Med',
+    'One Half Light', 'Atom One Light', 'Flexoki Light', 'Light Owl', 'Selenized Light',
+    'Iceberg Light', 'iTerm2 Solarized Light', 'Melange Light', 'Alabaster', 'Tomorrow',
+)
 PREFERRED_THEMES = [
     'Catppuccin Mocha', 'Catppuccin Macchiato', 'Catppuccin Frappe', 'Catppuccin Latte',
     'TokyoNight', 'TokyoNight Storm', 'TokyoNight Night', 'Dracula', 'Gruvbox Dark',
@@ -127,7 +141,7 @@ def theme_paths(bundled, explicit):
     return dict(sorted(themes.items(), key=sort_key))
 
 
-def terminal_colors(theme):
+def read_theme_colors(theme):
     palette = {}
     colors = {}
     with theme.open(encoding="utf-8-sig") as file:
@@ -147,6 +161,33 @@ def terminal_colors(theme):
                     palette[index] = "#" + value.strip().lstrip("#")
             elif key in COLORS and re.fullmatch(r"#?[0-9a-fA-F]{6}", value):
                 colors[COLORS[key]] = "#" + value.lstrip("#")
+    return palette, colors
+
+
+def collection_names(themes, collection):
+    if collection == "all":
+        return list(themes)
+    if collection == "top":
+        return [name for name in TOP_THEMES if name in themes]
+
+    names = []
+    for name, path in themes.items():
+        try:
+            _, colors = read_theme_colors(path)
+        except (OSError, UnicodeError):
+            continue
+        background = colors.get(COLORS["background"])
+        if background:
+            red, green, blue = bytes.fromhex(background[1:])
+            # Use the same brightness cutoff as Ghostty's theme list.
+            is_dark = (0.2126 * red + 0.7152 * green + 0.0722 * blue) < 127.5
+            if is_dark == (collection == "dark"):
+                names.append(name)
+    return names
+
+
+def terminal_colors(theme):
+    palette, colors = read_theme_colors(theme)
     if not (palette or colors):
         raise ValueError("no supported color settings")
     return "".join(
@@ -326,13 +367,13 @@ def sample_lines():
     ]
 
 
-def draw(rows, cols, view, selected, query, typing, issue):
+def draw(rows, cols, collection, view, selected, query, typing, issue):
     count = len(view)
     status = f"{selected + 1 if count else 0}/{count}"
     if query or typing:
         status += f"  filter: {query}" + ("_" if typing else "")
-    controls = ("Enter done  Esc clear" if typing else "↑↓ preview  PgUp/PgDn jump  / filter  Enter save  q cancel")
-    heading = f"{CSI}1m gtheme{CSI}0m  {status}  {controls}"
+    controls = ("Enter done  Esc clear" if typing else "Tab lists  ↑↓ preview  / filter  Enter save  q cancel")
+    heading = f"{CSI}1m gtheme{CSI}0m  [{COLLECTIONS[collection]}]  {status}  {controls}"
     current = view[selected] if view else "No matching themes"
     highlight = f"{CSI}7m > {current} {CSI}0m"
     lines = [heading]
@@ -347,7 +388,7 @@ def draw(rows, cols, view, selected, query, typing, issue):
         if count:
             lines.append(f" ‹ {nearby(-1)}  {highlight}  {nearby(1)} ›")
         else:
-            lines.append("No matching themes." if typing else "No matching themes. Press / to filter again.")
+            lines.append("No matching themes. Press Tab to switch lists.")
         lines.append("".join(f"{CSI}3{i}m██{CSI}9{i}m██{CSI}0m " for i in range(8)))
         if issue:
             lines.append(issue)
@@ -368,10 +409,12 @@ def interrupt(_signum, _frame):
     raise KeyboardInterrupt
 
 
-def pick(themes, original, explicit=False):
+def pick(themes, original, explicit=False, collection="all"):
     fd = sys.stdin.fileno()
     old = termios.tcgetattr(fd)
-    names = list(themes)
+    collections = tuple(COLLECTIONS)
+    names = collection_names(themes, collection)
+    cached = {collection: names}
     view = names
     selected = next(
         (i for i, name in enumerate(names) if original in (name, str(themes[name].absolute()))),
@@ -381,6 +424,11 @@ def pick(themes, original, explicit=False):
     typing = False
     previewed = None
     issue = ""
+
+    def filter_names():
+        search = fold(query)
+        return [name for name in names if search in fold(name)] if search else names
+
     handlers = {sig: signal.signal(sig, interrupt) for sig in (signal.SIGTERM, signal.SIGHUP)}
     try:
         tty.setraw(fd)
@@ -399,7 +447,7 @@ def pick(themes, original, explicit=False):
                 previewed = current
 
             size = os.get_terminal_size(fd)
-            draw(size.lines or 24, size.columns or 80, view, selected, query, typing, issue)
+            draw(size.lines or 24, size.columns or 80, collection, view, selected, query, typing, issue)
             while not select.select([fd], [], [], 0.15)[0]:
                 if os.get_terminal_size(fd) != size:
                     break
@@ -407,7 +455,15 @@ def pick(themes, original, explicit=False):
                 key = read_key(fd)
                 if not key or key == "\x03":
                     return None
-                if typing:
+                if key in ("\t", "\x1b[Z"):
+                    direction = 1 if key == "\t" else -1
+                    collection = collections[(collections.index(collection) + direction) % len(collections)]
+                    if collection not in cached:
+                        cached[collection] = collection_names(themes, collection)
+                    names = cached[collection]
+                    view = filter_names()
+                    selected = view.index(current) if current in view else 0
+                elif typing:
                     if key in ("\r", "\n"):
                         typing = False
                         continue
@@ -420,8 +476,7 @@ def pick(themes, original, explicit=False):
                         query += key
                     else:
                         continue
-                    search = fold(query)
-                    view = [name for name in names if search in fold(name)]
+                    view = filter_names()
                     selected = 0
                 elif key in ("\x1b[A", "\x1bOA", "k"):
                     selected = (selected - 1) % max(1, len(view))
@@ -454,6 +509,14 @@ def main():
     parser.add_argument("--config", type=Path, help="Ghostty config to edit")
     parser.add_argument("--themes-dir", type=Path, help="Read themes from this directory")
     parser.add_argument("--no-reload", action="store_true", help="Save without signaling Ghostty")
+    lists = parser.add_mutually_exclusive_group()
+    lists.add_argument("--top", dest="collection", action="store_const", const="top",
+                       help="Start in the curated Top 50 list")
+    lists.add_argument("--dark", dest="collection", action="store_const", const="dark",
+                       help="Start with dark themes")
+    lists.add_argument("--light", dest="collection", action="store_const", const="light",
+                       help="Start with light themes")
+    parser.set_defaults(collection="all")
     args = parser.parse_args()
     if sys.version_info < (3, 8):
         parser.error("Python 3.8 or newer is required")
@@ -469,7 +532,7 @@ def main():
             parser.error(f"no themes found in {directory}; check Ghostty or pass --themes-dir")
         settings = THEME_SETTING.findall(config_bytes(config)[0].decode("utf-8-sig"))
         original = settings[-1].strip().strip('"') if settings else None
-        chosen = pick(themes, original, args.themes_dir is not None)
+        chosen = pick(themes, original, args.themes_dir is not None, args.collection)
         if not chosen:
             print("Cancelled. Ghostty config was not changed.")
             return 0

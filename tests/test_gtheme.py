@@ -77,6 +77,42 @@ class PickerTests(unittest.TestCase):
 
         return process, master, slave, read_until, exited
 
+    def test_theme_collections_classify_background_and_keep_curated_order(self):
+        (self.bundle / "Catppuccin Latte").write_text("background = #eff1f5\n")
+        (self.bundle / "Palette Only").write_text("palette = 1=#123abc\n")
+        themes = {path.name: path for path in self.bundle.iterdir()}
+        names = GT["collection_names"]
+        self.assertEqual(names(themes, "top"), ["Nord", "Catppuccin Latte"])
+        self.assertEqual(names(themes, "light"), ["Catppuccin Latte"])
+        self.assertEqual(set(names(themes, "dark")), {"Nord", "Café", "Bad, name"})
+        self.assertEqual(len(GT["TOP_THEMES"]), 50)
+
+    def test_tab_cycles_lists_and_preserves_search(self):
+        (self.bundle / "Nord Light").write_text("background = #e5e9f0\n")
+        _, fd, _, read, exited = self.start_picker("--config", str(self.config))
+        read(b"[All]  1/5")
+        os.write(fd, b"\t")
+        read(b"[Top 50]  1/2")
+        os.write(fd, b"/nord\r\t")
+        read(b"[Dark]  1/1  filter: nord")
+        os.write(fd, b"\t")
+        read(b"[Light]  1/1  filter: nord")
+        os.write(fd, b"\x1b[Z")
+        read(b"[Dark]  1/1  filter: nord")
+        os.write(fd, b"q")
+        read(b"Cancelled")
+        exited()
+        self.assertFalse(self.config.exists())
+
+    def test_light_flag_starts_in_light_list_and_saves(self):
+        (self.bundle / "Nord Light").write_text("background = #e5e9f0\n")
+        _, fd, _, read, exited = self.start_picker("--light", "--no-reload", "--config", str(self.config))
+        read(b"[Light]  1/1")
+        os.write(fd, b"\r")
+        read(b"Saved Nord Light")
+        exited()
+        self.assertEqual(self.config.read_text(), "theme = Nord Light\n")
+
     def test_cancel_leaves_config_and_restores_terminal(self):
         self.config.write_text("theme = Nord\n")
         _, fd, _, read, exited = self.start_picker("--config", str(self.config))

@@ -131,14 +131,12 @@
     </section>
     <div class="details">
       <section id="install" aria-labelledby="install-title">
-        <h2 id="install-title">Install in your home directory</h2>
-        <p>Requires Ghostty on macOS, Python 3.8+, and Git.</p>
-        <pre><code>git clone https://github.com/hypercryptoman/gtheme.git
-cd gtheme
-mkdir -p ~/.local/bin
-install -m 755 gtheme ~/.local/bin/gtheme
-~/.local/bin/gtheme</code></pre>
-        <p><a href="https://github.com/hypercryptoman/gtheme/blob/main/gtheme">View the Python source</a></p>
+        <h2 id="install-title">Install with pipx</h2>
+        <p>Requires Ghostty on macOS, Python 3.8+, and Git. If you use Homebrew, install pipx with <code>brew install pipx</code>.</p>
+        <pre><code>pipx install git+https://github.com/hypercryptoman/gtheme.git
+gtheme</code></pre>
+        <p>If your shell can’t find <code>gtheme</code>, run <code>pipx ensurepath</code> and open a new Ghostty tab.</p>
+        <p><a href="https://github.com/hypercryptoman/gtheme/blob/main/gtheme.py">View the Python source</a></p>
       </section>
       <section aria-labelledby="keys-title">
         <h2 id="keys-title">Use the keyboard</h2>

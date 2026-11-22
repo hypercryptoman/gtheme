@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gtheme"
+version = "0.1.0"
+description = "Live Ghostty theme picker for macOS"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Environment :: Console",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python :: 3",
+]
+
+[project.scripts]
+gtheme = "gtheme:main"
+
+[project.urls]
+Homepage = "https://hypercryptoman.github.io/gtheme/"
+Repository = "https://github.com/hypercryptoman/gtheme"
+Issues = "https://github.com/hypercryptoman/gtheme/issues"
+
+[tool.setuptools]
+py-modules = ["gtheme"]

@@ -6,7 +6,20 @@ gtheme lets you preview and change Ghostty themes on macOS with your keyboard. F
 
 ## Install
 
-You’ll need macOS, Ghostty, Python 3.8 or newer, and Git for the clone step. The command uses Python’s standard library.
+Requires Ghostty on macOS, Python 3.8 or newer, and Git. Install with `pipx` to get the `gtheme` command in an isolated Python environment.
+
+```sh
+pipx install git+https://github.com/hypercryptoman/gtheme.git
+```
+
+If `pipx` is missing and you use Homebrew, run `brew install pipx`. If your shell can’t find `gtheme` after installation, run `pipx ensurepath` and open a new Ghostty tab.
+
+If you previously installed the standalone script at `~/.local/bin/gtheme`, move it aside before switching to pipx so the two installs don’t compete for the same command.
+
+Run `pipx reinstall gtheme` to pick up the latest changes from GitHub. Run `pipx uninstall gtheme` to remove the command.
+
+<details>
+<summary>Install from a Git clone</summary>
 
 ```sh
 git clone https://github.com/hypercryptoman/gtheme.git
@@ -15,7 +28,9 @@ mkdir -p ~/.local/bin
 install -m 755 gtheme ~/.local/bin/gtheme
 ```
 
-Open a Ghostty window and run `~/.local/bin/gtheme`. If `~/.local/bin` is on your `PATH`, run `gtheme`.
+Run `~/.local/bin/gtheme`, or run `gtheme` if `~/.local/bin` is already on your `PATH`.
+
+</details>
 
 ## Use
 
@@ -55,7 +70,7 @@ Saving writes one `theme` value to your Ghostty config and prints the file it up
 
 ## Troubleshooting
 
-- **`gtheme: command not found`.** Run `~/.local/bin/gtheme` or add `~/.local/bin` to your `PATH` as shown above. If the error names `python3`, install Python 3.8 or later and confirm that `python3 --version` works in the same Ghostty window.
+- **`gtheme: command not found`.** For a `pipx` install, run `pipx ensurepath` and open a new Ghostty tab. For a standalone install, run `~/.local/bin/gtheme` directly. If the error names `python3`, install Python 3.8 or later and confirm that `python3 --version` works in the same Ghostty window.
 - **No themes found or colors don’t preview.** Run the picker directly in Ghostty on your Mac. A remote shell or terminal multiplexer can block the escape sequences used for previews. The picker looks in the app bundle and in `$XDG_CONFIG_HOME/ghostty/themes` (or `~/.config/ghostty/themes`). If Ghostty is installed elsewhere, pass its theme directory with `--themes-dir`.
 - **The saved theme doesn’t take effect.** Press Cmd+Shift+, or use Ghostty’s Reload Configuration command. Check the config path printed by `gtheme`. An included config file, a launch argument, or explicit color settings can override the chosen theme. Use `--config` to target the file that sets the effective theme. Use `--no-reload` when testing or editing a separate config. [Ghostty configuration guide](https://ghostty.org/docs/config)
 - **A custom theme can’t be selected.** Use a readable Ghostty theme file with color settings such as `background = #1e1e2e`. If the picker reports a filename problem, remove commas, colons, equal signs, and double quotes from its filename or the absolute path used with `--themes-dir`.

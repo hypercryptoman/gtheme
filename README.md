@@ -53,6 +53,7 @@ Top 50 follows the gallery’s curated order and shows themes available in your 
 | ↑ / ↓ or `k` / `j` | Move one theme and preview it |
 | Tab / Shift+Tab | Switch to the next or previous list |
 | Page Up / Page Down | Jump up or down by ten themes |
+| Home / End | Jump to the first or last theme |
 | `/` | Start a case-insensitive name filter |
 | Backspace | Remove a character while editing the filter |
 | Enter while filtering | Finish typing and keep the filtered results |
@@ -98,3 +99,7 @@ The picker displays sample terminal output to show how each theme colors text.
 **Filtering by `nord` with Nord highlighted**
 
 ![gtheme previewing Nord with the theme list narrowed to names that match nord](assets/gtheme-filtering.png)
+
+## License
+
+MIT. See [LICENSE](LICENSE).

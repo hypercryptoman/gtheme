@@ -139,6 +139,20 @@ class PickerTests(unittest.TestCase):
         exited()
         self.assertEqual(self.config.read_text(), "theme = Nord\n")
 
+    def test_home_and_end_jump_to_list_edges(self):
+        self.config.write_text("theme = Nord\n")
+        _, fd, _, read, exited = self.start_picker("--config", str(self.config))
+        read(b"themes (4)")
+        os.write(fd, b"\x1b[F")
+        read(b"4/4")
+        os.write(fd, b"\x1b[H")
+        read(b"1/4")
+        os.write(fd, b"\x1bOF")
+        read(b"4/4")
+        os.write(fd, b"q")
+        read(b"Cancelled")
+        exited()
+
     def test_save_reports_manual_reload_when_outside_ghostty(self):
         _, fd, _, read, exited = self.start_picker("--config", str(self.config))
         read(b"themes (4)")

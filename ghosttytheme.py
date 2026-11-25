@@ -42,32 +42,31 @@ TOP_THEMES = (
 PREFERRED_THEMES = [
     'Catppuccin Mocha', 'Catppuccin Macchiato', 'Catppuccin Frappe', 'Catppuccin Latte',
     'TokyoNight', 'TokyoNight Storm', 'TokyoNight Night', 'Dracula', 'Gruvbox Dark',
-    'Gruvbox Dark Hard', 'Nord', 'Rose Pine', 'Rose Pine Moon', 'Rose Pine Dawn',
-    'Kanagawa Wave', 'Kanagawa Dragon', 'Everforest Dark Hard', 'Everforest Light Med',
+    'Gruvbox Dark Hard', 'Nord', 'Rose Pine', 'Rose Pine Moon', 'Rose Pine Dawn', 'Kanagawa Wave',
+    'Kanagawa Dragon', 'Everforest Dark Hard', 'Everforest Light Med',
     'Solarized Dark Higher Contrast', 'One Half Dark', 'Atom One Dark', 'Nightfox', 'Carbonfox',
-    'Github Dark', 'Monokai Pro', 'Ayu Mirage', 'Zenburn', 'Synthwave', 'Poimandres',
-    'Melange Dark', 'Github Light Default', 'Github Dark Default', 'GitHub Dark Dimmed',
+    'GitHub Dark', 'Monokai Pro', 'Ayu Mirage', 'Zenburn', 'Synthwave', 'Poimandres',
+    'Melange Dark', 'GitHub Light Default', 'GitHub Dark Default', 'GitHub Dark Dimmed',
     'Ayu Light', 'Material Darker', 'Material Ocean', 'Dawnfox', 'Dayfox', 'Duskfox', 'Nordfox',
     'Terafox', 'Night Owl', 'Light Owl', 'Cobalt2', 'Horizon', 'Sonokai', 'Moonfly',
     'Iceberg Dark', 'Iceberg Light', 'Tomorrow Night', 'Tomorrow Night Bright',
-    'Tomorrow Night Burns', 'Tomorrow Night Eighties', 'Tomorrow', 'Snazzy',
-    'Monokai Remastered', 'Monokai Soda', 'Monokai Vivid', 'Selenized Dark', 'Selenized Light',
-    'Selenized Black', 'Gruvbox Light', 'Gruvbox Light Hard', 'Gruvbox Material',
-    'Gruvbox Material Dark', 'Gruvbox Material Light', 'Kanagawa Lotus', 'TokyoNight Day',
-    'Nord Light', 'Nord Wave', 'Challenger Deep', 'Cyberpunk', 'Dark Pastel', 'Darkside',
-    'Doom One', 'Doom Peacock', 'Espresso', 'Fahrenheit', 'Flat', 'Flatland', 'Framer',
-    'Fish Tank', 'Galaxy', 'Hardcore', 'Harper', 'Hax0r Blue', 'Hurtado', 'Hybrid',
-    'Jackie Brown', 'Kibble', 'Laser', 'Liquid Carbon', 'Lovelace', 'Man Page', 'Mariana',
-    'Mathias', 'Medallion', 'Mirage', 'Molokai', 'Monokai Pro Machine', 'Monokai Pro Octagon',
-    'Monokai Pro Ristretto', 'Monokai Pro Spectrum', 'Neon', 'Neopolitan', 'Nvim Dark',
-    'Nvim Light', 'Obsidian', 'Ocean', 'Oceanic Next', 'One Half Light', 'Atom One Light',
-    'Onenord', 'Paraiso Dark', 'Pencil Dark', 'Pencil Light', 'Pro', 'Red Alert', 'Red Planet',
-    'Rouge 2', 'Royal', 'Seafoam Pastel', 'Seoulbones Dark', 'Shades Of Purple', 'Slate',
-    'Smyck', 'Spacedust', 'Spiderman', 'Square', 'Sundried', '0x96f', 'Abernathy', 'Agave Dusk',
-    'Apple System Colors', 'Aubade', 'base16-icy', 'Black Metal (Burzum)', 'Blood Moon',
-    'branch', 'Builtin Tango Light', 'Canyon Walnut', 'Cholla', 'CLRS', 'Copper Canyon',
-    'Cutie Pro', 'datum (dark)', 'Desert Morning', 'Django Smooth', 'Earthsong', 'Embark',
-    'Everforest Dark Med', 'Farmhouse Light', 'Forged in Steel', 'GitHub Dark', 'Glacier',
+    'Tomorrow Night Burns', 'Tomorrow Night Eighties', 'Tomorrow', 'Snazzy', 'Monokai Remastered',
+    'Monokai Soda', 'Monokai Vivid', 'Selenized Dark', 'Selenized Light', 'Selenized Black',
+    'Gruvbox Light', 'Gruvbox Light Hard', 'Gruvbox Material', 'Gruvbox Material Dark',
+    'Gruvbox Material Light', 'Kanagawa Lotus', 'TokyoNight Day', 'Nord Light', 'Nord Wave',
+    'Challenger Deep', 'Cyberpunk', 'Dark Pastel', 'Darkside', 'Doom One', 'Doom Peacock',
+    'Espresso', 'Fahrenheit', 'Flat', 'Flatland', 'Framer', 'Fish Tank', 'Galaxy', 'Hardcore',
+    'Harper', 'Hurtado', 'Hybrid', 'Jackie Brown', 'Kibble', 'Laser', 'Liquid Carbon', 'Lovelace',
+    'Man Page', 'Mariana', 'Mathias', 'Medallion', 'Mirage', 'Molokai', 'Monokai Pro Machine',
+    'Monokai Pro Octagon', 'Monokai Pro Ristretto', 'Monokai Pro Spectrum', 'Neon', 'Neopolitan',
+    'Nvim Dark', 'Nvim Light', 'Obsidian', 'Ocean', 'Oceanic Next', 'One Half Light',
+    'Atom One Light', 'Onenord', 'Paraiso Dark', 'Pencil Dark', 'Pencil Light', 'Pro', 'Red Alert',
+    'Red Planet', 'Rouge 2', 'Royal', 'Seafoam Pastel', 'Seoulbones Dark', 'Shades Of Purple',
+    'Slate', 'Smyck', 'Spacedust', 'Spiderman', 'Square', 'Sundried', '0x96f', 'Abernathy',
+    'Agave Dusk', 'Apple System Colors', 'Aubade', 'base16-icy', 'Black Metal (Burzum)',
+    'Blood Moon', 'branch', 'Builtin Tango Light', 'Canyon Walnut', 'Cholla', 'CLRS',
+    'Copper Canyon', 'Cutie Pro', 'datum (dark)', 'Desert Morning', 'Django Smooth', 'Earthsong',
+    'Embark', 'Everforest Dark Med', 'Farmhouse Light', 'Forged in Steel', 'Glacier',
     'Graveyard Shift', 'Harvest Moon', 'High Desert Snow', 'Hopscotch.256', 'IC Orange PPL',
     'Isocon Light', 'iTerm2 Tango Light', 'Kanagawabones', 'Karma Light', 'Konsolas',
     'Liquid Carbon Transparent', 'Matcha Zen', 'Mesa Twilight', 'Modus Operandi Deuteranopia',
@@ -401,7 +400,8 @@ def draw(rows, cols, collection, view, selected, query, typing, issue):
             for index in range(start, min(count, start + room)):
                 lines.append(highlight if index == selected else "   " + view[index])
     screen = "\r\n".join(clip(line, max(1, cols - 1)) + CSI + "K" for line in lines[:rows])
-    sys.stdout.write(CSI + "H" + CSI + "2J" + screen)
+    # Overwrite in place, then clear below; a full-screen clear flickers on fast redraws.
+    sys.stdout.write(CSI + "H" + screen + CSI + "J")
     sys.stdout.flush()
 
 
@@ -486,6 +486,10 @@ def pick(themes, original, explicit=False, collection="all"):
                     selected = max(0, selected - 10)
                 elif key == "\x1b[6~":
                     selected = min(max(0, len(view) - 1), selected + 10)
+                elif key in ("\x1b[H", "\x1bOH", "\x1b[1~", "\x1b[7~"):
+                    selected = 0
+                elif key in ("\x1b[F", "\x1bOF", "\x1b[4~", "\x1b[8~"):
+                    selected = max(0, len(view) - 1)
                 elif key == "/":
                     query, view, selected, typing = "", names, 0, True
                 elif key in ("\r", "\n") and current and not issue:

@@ -16,7 +16,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-SCRIPT = Path(__file__).resolve().parents[1] / "gtheme.py"
+SCRIPT = Path(__file__).resolve().parents[1] / "ghosttytheme.py"
 GT = runpy.run_path(str(SCRIPT))
 
 
